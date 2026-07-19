@@ -105,4 +105,59 @@ router.post('/:id/members', auth, checkRole(['owner', 'editor']), async (req, re
   }
 });
 
+// Add Activity
+router.post('/:id/itinerary/activities', auth, checkRole(['owner', 'editor']), async (req, res) => {
+  const { dayId, title, description, time, location, notes, reservationCode } = req.body;
+  try {
+    const activity = await prisma.activity.create({
+      data: { dayId, title, description, time, location, notes, reservationCode }
+    });
+    res.status(201).json(activity);
+  } catch {
+    res.status(500).json({ message: 'Error adding activity' });
+  }
+});
+
+// Edit Activity
+router.put('/:id/itinerary/activities/:activityId', auth, checkRole(['owner', 'editor']), async (req, res) => {
+  const { title, description, time, location, notes, reservationCode } = req.body;
+  try {
+    const activity = await prisma.activity.update({
+      where: { id: req.params.activityId },
+      data: { title, description, time, location, notes, reservationCode }
+    });
+    res.json(activity);
+  } catch {
+    res.status(500).json({ message: 'Error updating activity' });
+  }
+});
+
+// Delete Activity
+router.delete('/:id/itinerary/activities/:activityId', auth, checkRole(['owner', 'editor']), async (req, res) => {
+  try {
+    await prisma.activity.delete({
+      where: { id: req.params.activityId }
+    });
+    res.json({ message: 'Activity deleted successfully' });
+  } catch {
+    res.status(500).json({ message: 'Error deleting activity' });
+  }
+});
+
+// Reorder
+router.put('/:id/itinerary/reorder', auth, checkRole(['owner', 'editor']), async (req, res) => {
+  const { activities } = req.body; // Array of { id, dayId } values
+  try {
+    await prisma.$transaction(
+      activities.map(a => prisma.activity.update({
+        where: { id: a.id },
+        data: { dayId: a.dayId }
+      }))
+    );
+    res.json({ message: 'Itinerary reordered successfully' });
+  } catch {
+    res.status(500).json({ message: 'Error updating reordered items' });
+  }
+});
+
 module.exports = router;
