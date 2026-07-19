@@ -254,4 +254,30 @@ router.post('/:id/comments', auth, checkRole(['owner', 'editor', 'viewer']), asy
   }
 });
 
+const { upload, uploadToCloudinary } = require('../config/cloudinary');
+
+router.post('/:id/attachments', auth, checkRole(['owner', 'editor']), upload.single('file'), async (req, res) => {
+  const { activityId } = req.body;
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+    
+    const uploadResult = await uploadToCloudinary(req.file.buffer, `trip_${req.params.id}_activity_${activityId}_${Date.now()}`);
+    
+    const fileType = req.file.mimetype.includes('pdf') ? 'pdf' : 'image';
+    
+    const attachment = await prisma.attachment.create({
+      data: {
+        activityId,
+        name: req.file.originalname,
+        url: uploadResult.secure_url,
+        fileType,
+        uploadedById: req.user.id
+      }
+    });
+    res.status(201).json(attachment);
+  } catch {
+    res.status(500).json({ message: 'Error uploading attachment' });
+  }
+});
+
 module.exports = router;

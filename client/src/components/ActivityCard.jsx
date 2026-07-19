@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { Clock, MapPin, Notebook, Key, Edit3, Trash2, FileText, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import axios from 'axios';
+import { Clock, MapPin, Notebook, Key, Edit3, Trash2, FileText, ExternalLink, Image as ImageIcon, Upload } from 'lucide-react';
 
 function ActivityCard({ activity, onEdit, onDelete, userRole, socket, tripId }) {
   const { user } = useContext(AuthContext);
@@ -14,6 +15,28 @@ function ActivityCard({ activity, onEdit, onDelete, userRole, socket, tripId }) 
   const [location, setLocation] = useState(activity.location || '');
   const [notes, setNotes] = useState(activity.notes || '');
   const [reservationCode, setReservationCode] = useState(activity.reservationCode || '');
+
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('activityId', activity.id);
+    try {
+      await axios.post(`http://localhost:5000/api/trips/${tripId}/attachments`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      // Refresh current details using onEdit dummy change
+      await onEdit(activity.id, { title });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const isViewer = userRole === 'viewer';
 
@@ -236,6 +259,22 @@ function ActivityCard({ activity, onEdit, onDelete, userRole, socket, tripId }) 
                   rows={2}
                   className="w-full px-4 py-2.5 rounded-xl bg-gray-950 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm resize-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Upload Attachments (PDF/Image)</label>
+                <div className="flex items-center gap-3">
+                  <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-white/20 hover:border-indigo-500 bg-gray-950 text-gray-400 hover:text-white cursor-pointer transition-all text-sm font-semibold">
+                    <Upload size={16} />
+                    <span>{uploading ? 'Uploading attachment...' : 'Choose File'}</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
