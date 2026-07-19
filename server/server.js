@@ -51,6 +51,9 @@ io.on('connection', (socket) => {
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
+const tripRoutes = require('./routes/trips');
+app.use('/api/trips', tripRoutes);
+
 app.get('/health', (req, res) => res.send({ status: 'healthy' }));
 
 const PORT = process.env.PORT || 5000;

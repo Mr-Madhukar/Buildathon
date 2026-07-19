@@ -21,7 +21,7 @@ router.post('/register', async (req, res) => {
     const payload = { id: user.id, name: user.name, email: user.email };
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'jwt_secret_fallback', { expiresIn: '7d' });
     res.json({ token, user: payload });
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: 'Server error during registration' });
   }
 });
@@ -38,7 +38,7 @@ router.post('/login', async (req, res) => {
     const payload = { id: user.id, name: user.name, email: user.email };
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'jwt_secret_fallback', { expiresIn: '7d' });
     res.json({ token, user: payload });
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: 'Server error during login' });
   }
 });
@@ -50,7 +50,7 @@ router.get('/me', auth, async (req, res) => {
       select: { id: true, name: true, email: true, avatar: true }
     });
     res.json(user);
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: 'Server error fetching user profile' });
   }
 });
@@ -64,7 +64,7 @@ router.get('/users', auth, async (req, res) => {
       take: 10
     });
     res.json(users);
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: 'Server error querying users' });
   }
 });
