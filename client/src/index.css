@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-main: 224 71% 4%;        /* Dark Navy #030712 */
+  --bg-card: 224 47% 9%;        /* Slate #0B0F19 */
+  --border-glass: 217.9 10.6% 64.9% / 0.08; /* Glass frosted border */
+  
+  --primary: 262.1 83.3% 57.8%; /* Indigo #6366F1 */
+  --primary-glow: 262.1 83.3% 57.8% / 0.3;
+  --accent-violet: 271.5 81.3% 55.9%; /* Violet #8B5CF6 */
+  
+  --success: 162.2 76.2% 41.2%; /* Emerald #10B981 */
+  --danger: 346.8 91.2% 56.5%;  /* Rose #F43F5E */
+  
+  --text-main: 210 40% 98%;     /* Off-white */
+  --text-muted: 215.4 16.3% 66.9%; /* Muted gray */
+}
+
+body {
+  background-color: rgb(3, 7, 18);
+  color: hsl(var(--text-main));
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Frosted Class */
+.glass-panel {
+  background: rgba(11, 15, 25, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
+  transform: translateY(-2px);
+}
