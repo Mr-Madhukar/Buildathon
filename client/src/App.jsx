@@ -5,6 +5,9 @@ import axios from 'axios';
 import { LogOut, MapPin, Calendar, Users, ChevronRight, Plus, Loader2, ArrowLeft, Send, CheckSquare, DollarSign, MessageSquare, PlusCircle, Check } from 'lucide-react';
 import TripCard from './components/TripCard';
 import ItineraryDay from './components/ItineraryDay';
+import ChecklistSection from './components/ChecklistSection';
+import ExpenseTracker from './components/ExpenseTracker';
+import CommentDrawer from './components/CommentDrawer';
 
 function App() {
   const { user, token, loading, login, register, logout } = useContext(AuthContext);
@@ -523,27 +526,30 @@ function App() {
                 )}
 
                 {activeTab === 'checklist' && (
-                  <div className="glass-panel p-8 border border-white/10 text-center">
-                    <CheckSquare size={32} className="text-indigo-400 mx-auto mb-4" />
-                    <h3 className="font-bold text-lg mb-2">Checklists Sync Workspace</h3>
-                    <p className="text-gray-400 text-sm">Task 6 implementation step details will activate live shared checklists here.</p>
-                  </div>
+                  <ChecklistSection
+                    trip={selectedTrip}
+                    userRole={userRole}
+                    fetchTripDetails={() => fetchTripDetails(selectedTripId)}
+                    socket={socket}
+                  />
                 )}
 
                 {activeTab === 'budget' && (
-                  <div className="glass-panel p-8 border border-white/10 text-center">
-                    <DollarSign size={32} className="text-indigo-400 mx-auto mb-4" />
-                    <h3 className="font-bold text-lg mb-2">Expenses Split Ledger</h3>
-                    <p className="text-gray-400 text-sm">Task 6 implementation step details will activate live budget splitting here.</p>
-                  </div>
+                  <ExpenseTracker
+                    trip={selectedTrip}
+                    userRole={userRole}
+                    fetchTripDetails={() => fetchTripDetails(selectedTripId)}
+                    socket={socket}
+                  />
                 )}
 
                 {activeTab === 'comments' && (
-                  <div className="glass-panel p-8 border border-white/10 text-center">
-                    <MessageSquare size={32} className="text-indigo-400 mx-auto mb-4" />
-                    <h3 className="font-bold text-lg mb-2">Threaded Comments Workspace</h3>
-                    <p className="text-gray-400 text-sm">Task 6 implementation step details will activate trip-wide chatting here.</p>
-                  </div>
+                  <CommentDrawer
+                    trip={selectedTrip}
+                    user={user}
+                    fetchTripDetails={() => fetchTripDetails(selectedTripId)}
+                    socket={socket}
+                  />
                 )}
               </>
             ) : null}

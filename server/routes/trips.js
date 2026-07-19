@@ -160,4 +160,98 @@ router.put('/:id/itinerary/reorder', auth, checkRole(['owner', 'editor']), async
   }
 });
 
+// Add Checklist
+router.post('/:id/checklists', auth, checkRole(['owner', 'editor']), async (req, res) => {
+  const { title } = req.body;
+  try {
+    const checklist = await prisma.checklist.create({
+      data: { tripId: req.params.id, title },
+      include: { items: true }
+    });
+    res.status(201).json(checklist);
+  } catch {
+    res.status(500).json({ message: 'Error adding checklist' });
+  }
+});
+
+// Add Checklist Item
+router.post('/:id/checklists/:checklistId/items', auth, checkRole(['owner', 'editor']), async (req, res) => {
+  const { text } = req.body;
+  try {
+    const item = await prisma.checklistItem.create({
+      data: { checklistId: req.params.checklistId, text }
+    });
+    res.status(201).json(item);
+  } catch {
+    res.status(500).json({ message: 'Error adding checklist item' });
+  }
+});
+
+// Toggle Checklist Item
+router.put('/:id/checklists/:checklistId/items/:itemId', auth, checkRole(['owner', 'editor', 'viewer']), async (req, res) => {
+  const { completed } = req.body;
+  try {
+    const item = await prisma.checklistItem.update({
+      where: { id: req.params.itemId },
+      data: { completed, completedById: completed ? req.user.id : null },
+      include: { completedBy: { select: { id: true, name: true } } }
+    });
+    res.json(item);
+  } catch {
+    res.status(500).json({ message: 'Error toggling checklist item' });
+  }
+});
+
+// Add Expense
+router.post('/:id/expenses', auth, checkRole(['owner', 'editor']), async (req, res) => {
+  const { description, amount, category } = req.body;
+  try {
+    const expense = await prisma.expense.create({
+      data: {
+        tripId: req.params.id,
+        description,
+        amount: parseFloat(amount),
+        category,
+        paidById: req.user.id
+      },
+      include: { paidBy: { select: { id: true, name: true } } }
+    });
+    res.status(201).json(expense);
+  } catch {
+    res.status(500).json({ message: 'Error adding expense' });
+  }
+});
+
+// Get Comments
+router.get('/:id/comments', auth, checkRole(['owner', 'editor', 'viewer']), async (req, res) => {
+  try {
+    const comments = await prisma.comment.findMany({
+      where: { tripId: req.params.id },
+      include: { author: { select: { id: true, name: true, avatar: true } } },
+      orderBy: { createdAt: 'asc' }
+    });
+    res.json(comments);
+  } catch {
+    res.status(500).json({ message: 'Error fetching comments' });
+  }
+});
+
+// Post Comment
+router.post('/:id/comments', auth, checkRole(['owner', 'editor', 'viewer']), async (req, res) => {
+  const { text } = req.body;
+  try {
+    const comment = await prisma.comment.create({
+      data: {
+        tripId: req.params.id,
+        authorId: req.user.id,
+        text
+      },
+      include: { author: { select: { id: true, name: true, avatar: true } } }
+    });
+    res.status(201).json(comment);
+  } catch {
+    res.status(500).json({ message: 'Error creating comment' });
+  }
+});
+
 module.exports = router;

@@ -37,6 +37,22 @@ io.on('connection', (socket) => {
     socket.to(`trip:${tripId}`).emit('user-stop-editing', { activityId });
   });
 
+  socket.on('leave-trip', ({ tripId }) => {
+    socket.leave(`trip:${tripId}`);
+    if (activeRooms[tripId] && activeRooms[tripId][socket.id]) {
+      delete activeRooms[tripId][socket.id];
+      io.to(`trip:${tripId}`).emit('presence-update', Object.values(activeRooms[tripId]));
+    }
+  });
+
+  socket.on('trip-updated', ({ tripId }) => {
+    socket.to(`trip:${tripId}`).emit('trip-updated');
+  });
+
+  socket.on('new-comment', ({ tripId, comment }) => {
+    socket.to(`trip:${tripId}`).emit('new-comment', comment);
+  });
+
   socket.on('disconnect', () => {
     for (const tripId in activeRooms) {
       if (activeRooms[tripId][socket.id]) {
