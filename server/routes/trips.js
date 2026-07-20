@@ -69,7 +69,14 @@ router.get('/:id', auth, checkRole(['owner', 'editor', 'viewer']), async (req, r
       where: { id: req.params.id },
       include: {
         members: { include: { user: { select: { id: true, name: true, email: true, avatar: true } } } },
-        itinerary: { include: { activities: { include: { attachments: true } } } },
+        itinerary: { 
+          include: { 
+            activities: { 
+              include: { attachments: true },
+              orderBy: { position: 'asc' }
+            } 
+          } 
+        },
         checklists: { include: { items: true } },
         expenses: { include: { paidBy: { select: { id: true, name: true } } } }
       }
@@ -146,12 +153,12 @@ router.delete('/:id/itinerary/activities/:activityId', auth, checkRole(['owner',
 
 // Reorder
 router.put('/:id/itinerary/reorder', auth, checkRole(['owner', 'editor']), async (req, res) => {
-  const { activities } = req.body; // Array of { id, dayId } values
+  const { activities } = req.body; // Array of { id, dayId, position }
   try {
     await prisma.$transaction(
       activities.map(a => prisma.activity.update({
         where: { id: a.id },
-        data: { dayId: a.dayId }
+        data: { dayId: a.dayId, position: a.position ?? 0 }
       }))
     );
     res.json({ message: 'Itinerary reordered successfully' });
@@ -224,9 +231,20 @@ router.post('/:id/expenses', auth, checkRole(['owner', 'editor']), async (req, r
 
 // Get Comments
 router.get('/:id/comments', auth, checkRole(['owner', 'editor', 'viewer']), async (req, res) => {
+  const { dayNumber, activityId } = req.query;
   try {
+    const whereClause = { tripId: req.params.id };
+    if (dayNumber) {
+      whereClause.dayNumber = parseInt(dayNumber);
+    } else if (activityId) {
+      whereClause.activityId = activityId;
+    } else {
+      whereClause.dayNumber = null;
+      whereClause.activityId = null;
+    }
+
     const comments = await prisma.comment.findMany({
-      where: { tripId: req.params.id },
+      where: whereClause,
       include: { author: { select: { id: true, name: true, avatar: true } } },
       orderBy: { createdAt: 'asc' }
     });
@@ -238,13 +256,15 @@ router.get('/:id/comments', auth, checkRole(['owner', 'editor', 'viewer']), asyn
 
 // Post Comment
 router.post('/:id/comments', auth, checkRole(['owner', 'editor', 'viewer']), async (req, res) => {
-  const { text } = req.body;
+  const { text, dayNumber, activityId } = req.body;
   try {
     const comment = await prisma.comment.create({
       data: {
         tripId: req.params.id,
         authorId: req.user.id,
-        text
+        text,
+        dayNumber: dayNumber ? parseInt(dayNumber) : null,
+        activityId: activityId || null
       },
       include: { author: { select: { id: true, name: true, avatar: true } } }
     });

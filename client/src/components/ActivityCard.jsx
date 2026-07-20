@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
-import { Clock, MapPin, Notebook, Key, Edit3, Trash2, FileText, ExternalLink, Image as ImageIcon, Upload } from 'lucide-react';
+import { Clock, MapPin, Notebook, Key, Edit3, Trash2, FileText, ExternalLink, Image as ImageIcon, Upload, ArrowUp, ArrowDown, MessageSquare } from 'lucide-react';
+import InlineComments from './InlineComments';
 
-function ActivityCard({ activity, onEdit, onDelete, userRole, socket, tripId }) {
+function ActivityCard({ activity, onEdit, onDelete, userRole, socket, tripId, index, totalCount, allDays, dayId, onReorder }) {
   const { user } = useContext(AuthContext);
   const [editingUser, setEditingUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   // Edit fields
   const [title, setTitle] = useState(activity.title);
@@ -63,6 +65,69 @@ function ActivityCard({ activity, onEdit, onDelete, userRole, socket, tripId }) 
       socket.off('user-stop-editing', handleUserStopEditing);
     };
   }, [socket, activity.id]);
+
+  const handleMoveUp = (e) => {
+    e.stopPropagation();
+    if (index === 0) return;
+    const currentDay = allDays?.find(d => d.id === dayId);
+    if (!currentDay) return;
+    const list = [...currentDay.activities];
+    const temp = list[index];
+    list[index] = list[index - 1];
+    list[index - 1] = temp;
+    
+    const payload = list.map((act, idx) => ({
+      id: act.id,
+      dayId: currentDay.id,
+      position: idx
+    }));
+    onReorder(payload);
+  };
+
+  const handleMoveDown = (e) => {
+    e.stopPropagation();
+    if (index === totalCount - 1) return;
+    const currentDay = allDays?.find(d => d.id === dayId);
+    if (!currentDay) return;
+    const list = [...currentDay.activities];
+    const temp = list[index];
+    list[index] = list[index + 1];
+    list[index + 1] = temp;
+
+    const payload = list.map((act, idx) => ({
+      id: act.id,
+      dayId: currentDay.id,
+      position: idx
+    }));
+    onReorder(payload);
+  };
+
+  const handleMoveToDay = (e, targetDayId) => {
+    e.stopPropagation();
+    if (!targetDayId || targetDayId === dayId || !allDays) return;
+    
+    const payload = [];
+    allDays.forEach(d => {
+      if (d.id === dayId) {
+        const filtered = (d.activities || []).filter(a => a.id !== activity.id);
+        filtered.forEach((act, idx) => {
+          payload.push({ id: act.id, dayId: d.id, position: idx });
+        });
+      } else if (d.id === targetDayId) {
+        const existing = d.activities || [];
+        existing.forEach((act, idx) => {
+          payload.push({ id: act.id, dayId: d.id, position: idx });
+        });
+        payload.push({ id: activity.id, dayId: targetDayId, position: existing.length });
+      } else {
+        const existing = d.activities || [];
+        existing.forEach((act, idx) => {
+          payload.push({ id: act.id, dayId: d.id, position: idx });
+        });
+      }
+    });
+    onReorder(payload);
+  };
 
   const openEditModal = () => {
     if (isViewer || editingUser) return;
@@ -140,6 +205,58 @@ function ActivityCard({ activity, onEdit, onDelete, userRole, socket, tripId }) 
                 </div>
               )}
             </div>
+
+            <div className="flex items-center justify-between pt-2 mt-2 border-t border-white/5 select-none" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => setShowComments(!showComments)}
+                className="text-indigo-400 hover:text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              >
+                <MessageSquare size={13} />
+                <span>{showComments ? 'Hide Comments' : 'Show Comments'}</span>
+              </button>
+            </div>
+
+            {showComments && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <InlineComments
+                  tripId={tripId}
+                  activityId={activity.id}
+                  user={user}
+                  socket={socket}
+                />
+              </div>
+            )}
+
+            {!isViewer && !editingUser && (
+              <div className="flex items-center gap-2 pt-2 border-t border-white/5 mt-2" onClick={(e) => e.stopPropagation()}>
+                <button 
+                  disabled={index === 0}
+                  onClick={handleMoveUp}
+                  className="p-1 rounded bg-white/5 border border-white/10 hover:bg-indigo-500/20 text-gray-400 hover:text-indigo-400 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center justify-center"
+                  title="Move Up"
+                >
+                  <ArrowUp size={12} />
+                </button>
+                <button 
+                  disabled={index === totalCount - 1}
+                  onClick={handleMoveDown}
+                  className="p-1 rounded bg-white/5 border border-white/10 hover:bg-indigo-500/20 text-gray-400 hover:text-indigo-400 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center justify-center"
+                  title="Move Down"
+                >
+                  <ArrowDown size={12} />
+                </button>
+                <span className="text-[10px] text-gray-500 ml-1">Move to:</span>
+                <select
+                  value={dayId}
+                  onChange={(e) => handleMoveToDay(e, e.target.value)}
+                  className="px-1.5 py-0.5 rounded bg-gray-950 border border-white/10 text-[10px] text-gray-300 focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
+                >
+                  {allDays?.map(d => (
+                    <option key={d.id} value={d.id}>Day {d.dayNumber}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Attachments List */}
             {activity.attachments && activity.attachments.length > 0 && (

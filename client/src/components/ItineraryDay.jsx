@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Calendar, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar, Plus, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
 import ActivityCard from './ActivityCard';
+import InlineComments from './InlineComments';
 
-function ItineraryDay({ day, onAddActivity, onEditActivity, onDeleteActivity, userRole, socket, tripId }) {
+function ItineraryDay({ day, onAddActivity, onEditActivity, onDeleteActivity, userRole, socket, tripId, allDays, onReorderActivities, user }) {
   const [isOpen, setIsOpen] = useState(true);
+  const [showComments, setShowComments] = useState(false);
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -60,8 +62,28 @@ function ItineraryDay({ day, onAddActivity, onEditActivity, onDeleteActivity, us
       {/* Activities List */}
       {isOpen && (
         <div className="px-6 pb-6 pt-2 border-t border-white/5 space-y-4">
+          <div className="flex justify-between items-center bg-white/5 px-3 py-1.5 rounded-lg text-xs mt-2 select-none">
+            <span className="text-gray-400 font-semibold">Day Discussion</span>
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 transition-colors"
+            >
+              <MessageSquare size={12} />
+              <span>{showComments ? 'Hide Comments' : 'Show Comments'}</span>
+            </button>
+          </div>
+
+          {showComments && (
+            <InlineComments
+              tripId={tripId}
+              dayNumber={day.dayNumber}
+              user={user}
+              socket={socket}
+            />
+          )}
+
           {day.activities && day.activities.length > 0 ? (
-            day.activities.map((activity) => (
+            day.activities.map((activity, idx) => (
               <ActivityCard
                 key={activity.id}
                 activity={activity}
@@ -70,6 +92,12 @@ function ItineraryDay({ day, onAddActivity, onEditActivity, onDeleteActivity, us
                 userRole={userRole}
                 socket={socket}
                 tripId={tripId}
+                index={idx}
+                totalCount={day.activities.length}
+                allDays={allDays}
+                dayId={day.id}
+                onReorder={onReorderActivities}
+                user={user}
               />
             ))
           ) : (

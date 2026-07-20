@@ -202,6 +202,18 @@ function App() {
     }
   };
 
+  const handleReorderActivities = async (updatedActivities) => {
+    try {
+      await axios.put(`http://localhost:5000/api/trips/${selectedTripId}/itinerary/reorder`, {
+        activities: updatedActivities
+      });
+      await fetchTripDetails(selectedTripId);
+      socket.emit('trip-updated', { tripId: selectedTripId });
+    } catch {
+      setError('Failed to reorder activities');
+    }
+  };
+
   const handleInviteCollaborator = async (e) => {
     e.preventDefault();
     setInviteError('');
@@ -515,6 +527,9 @@ function App() {
                           userRole={userRole}
                           socket={socket}
                           tripId={selectedTripId}
+                          allDays={selectedTrip.itinerary}
+                          onReorderActivities={handleReorderActivities}
+                          user={user}
                         />
                       ))
                     ) : (

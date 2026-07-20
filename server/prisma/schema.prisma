@@ -67,6 +67,7 @@ model Activity {
   location        String?
   notes           String?
   reservationCode String?
+  position        Int          @default(0)
   day             ItineraryDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
   attachments     Attachment[]
 }
