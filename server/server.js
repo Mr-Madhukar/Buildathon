@@ -4,6 +4,7 @@ const cors = require('cors');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
+const app = express();
 const clientOrigin = process.env.CLIENT_URL || true;
 
 app.use(cors({
