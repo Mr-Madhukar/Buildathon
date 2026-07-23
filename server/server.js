@@ -76,6 +76,7 @@ app.use('/api/auth', authRoutes);
 const tripRoutes = require('./routes/trips');
 app.use('/api/trips', tripRoutes);
 
+app.get('/', (req, res) => res.send({ message: 'Collaborative Trip Planner API is running', status: 'online' }));
 app.get('/health', (req, res) => res.send({ status: 'healthy' }));
 
 const PORT = process.env.PORT || 5000;
