@@ -5,7 +5,7 @@ A premium, real-time collaborative itinerary planning platform built with the **
 ---
 
 ## 🌐 Live Demo & Repository
-* **Hosted Frontend Application:** `[Insert Live Link Here]` *(e.g., Vercel or Netlify)*
+* **Hosted Frontend Application:** https://collaborative-trip.vercel.app/
 * **Hosted Backend API:** https://collaborative-trip-planner-api.onrender.com
 * **GitHub Repository:** `[Insert Repository Link Here]`
 
