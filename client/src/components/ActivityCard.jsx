@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import { API_URL } from '../config';
 import { Clock, MapPin, Notebook, Key, Edit3, Trash2, FileText, ExternalLink, Image as ImageIcon, Upload, ArrowUp, ArrowDown, MessageSquare } from 'lucide-react';
 import InlineComments from './InlineComments';
 
@@ -28,7 +29,7 @@ function ActivityCard({ activity, onEdit, onDelete, userRole, socket, tripId, in
     formData.append('file', file);
     formData.append('activityId', activity.id);
     try {
-      await axios.post(`http://localhost:5000/api/trips/${tripId}/attachments`, formData, {
+      await axios.post(`${API_URL}/api/trips/${tripId}/attachments`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       // Refresh current details using onEdit dummy change

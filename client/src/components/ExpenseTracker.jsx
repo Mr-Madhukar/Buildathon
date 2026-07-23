@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config';
 import { Plus, DollarSign, Wallet, ArrowUpRight, TrendingUp, Loader2 } from 'lucide-react';
 
 function ExpenseTracker({ trip, userRole, fetchTripDetails, socket }) {
@@ -18,7 +19,7 @@ function ExpenseTracker({ trip, userRole, fetchTripDetails, socket }) {
     if (!desc.trim() || !amount) return;
     setLoading(true);
     try {
-      await axios.post(`http://localhost:5000/api/trips/${trip.id}/expenses`, {
+      await axios.post(`${API_URL}/api/trips/${trip.id}/expenses`, {
         description: desc,
         amount: parseFloat(amount),
         category,

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
 import socket from './utils/socket';
 import axios from 'axios';
+import { API_URL } from './config';
 import { LogOut, MapPin, Calendar, Users, ChevronRight, Plus, Loader2, ArrowLeft, Send, CheckSquare, DollarSign, MessageSquare, PlusCircle, Check } from 'lucide-react';
 import TripCard from './components/TripCard';
 import ItineraryDay from './components/ItineraryDay';
@@ -57,7 +58,7 @@ function App() {
   // Fetch Trips
   const fetchTrips = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/trips');
+      const res = await axios.get(`${API_URL}/api/trips`);
       setTrips(res.data);
     } catch {
       setError('Failed to fetch trips');
@@ -76,7 +77,7 @@ function App() {
   const fetchTripDetails = async (id) => {
     setTripDetailLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/api/trips/${id}`);
+      const res = await axios.get(`${API_URL}/api/trips/${id}`);
       setSelectedTrip(res.data);
     } catch {
       setError('Failed to load trip details');
@@ -128,7 +129,7 @@ function App() {
   const handleCreateTrip = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/trips', {
+      const res = await axios.post(`${API_URL}/api/trips`, {
         title: tripTitle,
         description: tripDesc,
         startDate: tripStart,
@@ -147,7 +148,7 @@ function App() {
 
   const handleDeleteTrip = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/trips/${id}`);
+      await axios.delete(`${API_URL}/api/trips/${id}`);
       setTrips(trips.filter(t => t.id !== id));
     } catch {
       setError('Failed to delete trip');
@@ -157,7 +158,7 @@ function App() {
   const handleAddActivity = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`http://localhost:5000/api/trips/${selectedTripId}/itinerary/activities`, {
+      await axios.post(`${API_URL}/api/trips/${selectedTripId}/itinerary/activities`, {
         dayId: activityDayId,
         title: actTitle,
         description: actDesc,
@@ -184,7 +185,7 @@ function App() {
 
   const handleEditActivity = async (activityId, updatedFields) => {
     try {
-      await axios.put(`http://localhost:5000/api/trips/${selectedTripId}/itinerary/activities/${activityId}`, updatedFields);
+      await axios.put(`${API_URL}/api/trips/${selectedTripId}/itinerary/activities/${activityId}`, updatedFields);
       await fetchTripDetails(selectedTripId);
       socket.emit('trip-updated', { tripId: selectedTripId });
     } catch {
@@ -194,7 +195,7 @@ function App() {
 
   const handleDeleteActivity = async (activityId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/trips/${selectedTripId}/itinerary/activities/${activityId}`);
+      await axios.delete(`${API_URL}/api/trips/${selectedTripId}/itinerary/activities/${activityId}`);
       await fetchTripDetails(selectedTripId);
       socket.emit('trip-updated', { tripId: selectedTripId });
     } catch {
@@ -204,7 +205,7 @@ function App() {
 
   const handleReorderActivities = async (updatedActivities) => {
     try {
-      await axios.put(`http://localhost:5000/api/trips/${selectedTripId}/itinerary/reorder`, {
+      await axios.put(`${API_URL}/api/trips/${selectedTripId}/itinerary/reorder`, {
         activities: updatedActivities
       });
       await fetchTripDetails(selectedTripId);
@@ -219,7 +220,7 @@ function App() {
     setInviteError('');
     setInviteSuccess('');
     try {
-      await axios.post(`http://localhost:5000/api/trips/${selectedTripId}/members`, {
+      await axios.post(`${API_URL}/api/trips/${selectedTripId}/members`, {
         email: inviteEmail,
         role: inviteRole,
       });

@@ -12,6 +12,8 @@ yarn-error.log*
 dist/
 build/
 .DS_Store
-.superpowers/sdd/task-*-brief.md
-.superpowers/sdd/task-*-report.md
 .superpowers/sdd/review-package-*
+
+# Include all .md files, only exclude readme files
+!*.md
+[Rr][Ee][Aa][Dd][Mm][Ee].md

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config';
 import { Send, MessageSquare, Loader2 } from 'lucide-react';
 
 function CommentDrawer({ trip, user, fetchTripDetails, socket }) {
@@ -13,7 +14,7 @@ function CommentDrawer({ trip, user, fetchTripDetails, socket }) {
   const fetchComments = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/api/trips/${trip.id}/comments`);
+      const res = await axios.get(`${API_URL}/api/trips/${trip.id}/comments`);
       setComments(res.data);
     } catch (err) {
       console.error(err);
@@ -49,7 +50,7 @@ function CommentDrawer({ trip, user, fetchTripDetails, socket }) {
     if (!newComment.trim()) return;
     setSubmitLoading(true);
     try {
-      const res = await axios.post(`http://localhost:5000/api/trips/${trip.id}/comments`, {
+      const res = await axios.post(`${API_URL}/api/trips/${trip.id}/comments`, {
         text: newComment,
       });
       setComments([...comments, res.data]);

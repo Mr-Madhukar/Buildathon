@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config';
 import { Plus, Check, Trash2, ListTodo, CheckSquare, Loader2 } from 'lucide-react';
 
 function ChecklistSection({ trip, userRole, fetchTripDetails, socket }) {
@@ -14,7 +15,7 @@ function ChecklistSection({ trip, userRole, fetchTripDetails, socket }) {
     if (!newCategoryTitle.trim()) return;
     setLoading(true);
     try {
-      await axios.post(`http://localhost:5000/api/trips/${trip.id}/checklists`, {
+      await axios.post(`${API_URL}/api/trips/${trip.id}/checklists`, {
         title: newCategoryTitle,
       });
       setNewCategoryTitle('');
@@ -32,7 +33,7 @@ function ChecklistSection({ trip, userRole, fetchTripDetails, socket }) {
     const text = newItemTexts[checklistId];
     if (!text || !text.trim()) return;
     try {
-      await axios.post(`http://localhost:5000/api/trips/${trip.id}/checklists/${checklistId}/items`, {
+      await axios.post(`${API_URL}/api/trips/${trip.id}/checklists/${checklistId}/items`, {
         text,
       });
       setNewItemTexts({ ...newItemTexts, [checklistId]: '' });
@@ -45,7 +46,7 @@ function ChecklistSection({ trip, userRole, fetchTripDetails, socket }) {
 
   const handleToggleItem = async (checklistId, itemId, currentCompleted) => {
     try {
-      await axios.put(`http://localhost:5000/api/trips/${trip.id}/checklists/${checklistId}/items/${itemId}`, {
+      await axios.put(`${API_URL}/api/trips/${trip.id}/checklists/${checklistId}/items/${itemId}`, {
         completed: !currentCompleted,
       });
       await fetchTripDetails(trip.id);

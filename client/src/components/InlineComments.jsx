@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config';
 import { Send, MessageSquare, Loader2 } from 'lucide-react';
 
 function InlineComments({ tripId, dayNumber, activityId, user, socket }) {
@@ -13,7 +14,7 @@ function InlineComments({ tripId, dayNumber, activityId, user, socket }) {
     setLoading(true);
     try {
       const query = dayNumber ? `dayNumber=${dayNumber}` : `activityId=${activityId}`;
-      const res = await axios.get(`http://localhost:5000/api/trips/${tripId}/comments?${query}`);
+      const res = await axios.get(`${API_URL}/api/trips/${tripId}/comments?${query}`);
       setComments(res.data);
     } catch (err) {
       console.error(err);
@@ -53,7 +54,7 @@ function InlineComments({ tripId, dayNumber, activityId, user, socket }) {
       if (dayNumber) payload.dayNumber = dayNumber;
       if (activityId) payload.activityId = activityId;
       
-      const res = await axios.post(`http://localhost:5000/api/trips/${tripId}/comments`, payload);
+      const res = await axios.post(`${API_URL}/api/trips/${tripId}/comments`, payload);
       setComments((prev) => [...prev, res.data]);
       setNewComment('');
       if (socket) {
