@@ -9,19 +9,24 @@ router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
   try {
     const userExists = await prisma.user.findUnique({ where: { email } });
-    if (userExists) return res.status(400).json({ message: 'User already exists' });
+    if (userExists && userExists.password !== 'PENDING_INVITATION') {
+      return res.status(400).json({ message: 'User already exists' });
+    }
     
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     
-    const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword }
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: { name, password: hashedPassword },
+      create: { name, email, password: hashedPassword }
     });
     
     const payload = { id: user.id, name: user.name, email: user.email };
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'jwt_secret_fallback', { expiresIn: '7d' });
     res.json({ token, user: payload });
-  } catch {
+  } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error during registration' });
   }
 });
@@ -38,7 +43,8 @@ router.post('/login', async (req, res) => {
     const payload = { id: user.id, name: user.name, email: user.email };
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'jwt_secret_fallback', { expiresIn: '7d' });
     res.json({ token, user: payload });
-  } catch {
+  } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Server error during login' });
   }
 });
@@ -50,7 +56,8 @@ router.get('/me', auth, async (req, res) => {
       select: { id: true, name: true, email: true, avatar: true }
     });
     res.json(user);
-  } catch {
+  } catch (error) {
+    console.error('Get profile error:', error);
     res.status(500).json({ message: 'Server error fetching user profile' });
   }
 });
@@ -64,7 +71,8 @@ router.get('/users', auth, async (req, res) => {
       take: 10
     });
     res.json(users);
-  } catch {
+  } catch (error) {
+    console.error('Query users error:', error);
     res.status(500).json({ message: 'Server error querying users' });
   }
 });

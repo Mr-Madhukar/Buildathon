@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: dark;
   --bg-main: 224 71% 4%;        /* Dark Navy #030712 */
   --bg-card: 224 47% 9%;        /* Slate #0B0F19 */
   --border-glass: 217.9 10.6% 64.9% / 0.08; /* Glass frosted border */

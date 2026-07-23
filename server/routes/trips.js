@@ -35,9 +35,12 @@ router.post('/', auth, async (req, res) => {
         });
       }
       return createdTrip;
+    }, {
+      timeout: 20000
     });
     res.status(201).json(trip);
-  } catch {
+  } catch (error) {
+    console.error('Error creating trip:', error);
     res.status(500).json({ message: 'Error creating trip' });
   }
 });
@@ -91,8 +94,16 @@ router.get('/:id', auth, checkRole(['owner', 'editor', 'viewer']), async (req, r
 router.post('/:id/members', auth, checkRole(['owner', 'editor']), async (req, res) => {
   const { email, role } = req.body;
   try {
-    const invitee = await prisma.user.findUnique({ where: { email } });
-    if (!invitee) return res.status(404).json({ message: 'User not found' });
+    let invitee = await prisma.user.findUnique({ where: { email } });
+    if (!invitee) {
+      invitee = await prisma.user.create({
+        data: {
+          name: email.split('@')[0],
+          email,
+          password: 'PENDING_INVITATION',
+        }
+      });
+    }
     
     const trip = req.trip;
     const alreadyMember = trip.members.some(m => m.userId === invitee.id);

@@ -774,7 +774,7 @@ function App() {
                     required
                     value={tripStart}
                     onChange={(e) => setTripStart(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-gray-950 border border-white/10 text-white focus:outline-none focus:border-indigo-500 transition-all text-sm text-gray-400"
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-950 border border-white/10 text-white scheme-dark focus:outline-none focus:border-indigo-500 transition-all text-sm"
                   />
                 </div>
                 <div>
@@ -784,7 +784,7 @@ function App() {
                     required
                     value={tripEnd}
                     onChange={(e) => setTripEnd(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-gray-950 border border-white/10 text-white focus:outline-none focus:border-indigo-500 transition-all text-sm text-gray-400"
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-950 border border-white/10 text-white scheme-dark focus:outline-none focus:border-indigo-500 transition-all text-sm"
                   />
                 </div>
               </div>
