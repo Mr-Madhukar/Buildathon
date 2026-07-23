@@ -14,6 +14,9 @@ build/
 .DS_Store
 .superpowers/sdd/review-package-*
 
-# Include all .md files, only exclude readme files
+# Explicitly include documentation & prd
+!docs/
+!prd.md
+
+# Include all .md files (including README.md)
 !*.md
-[Rr][Ee][Aa][Dd][Mm][Ee].md
